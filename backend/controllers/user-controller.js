@@ -62,7 +62,7 @@ export const addUser = async(req, res, next) => {
             password: password,
         });
 
-        user = user.save()
+        user = await user.save()
     }
     catch (err) {
         return next(err)
@@ -81,3 +81,9 @@ export const addUser = async(req, res, next) => {
     })
 
 }
+
+//export const login = async(req, res, next) => {
+
+//    let { email, password } = req.query;
+
+//}
