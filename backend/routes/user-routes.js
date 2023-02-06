@@ -1,5 +1,5 @@
 import express from "express"
-import { getAllUsers, login, addUser, updateUser, deleteUser, addFavoriteExercise, removeFavoriteExercise, addFavoriteWorkout, removeFavoriteWorkout } from "../controllers/user-controller.js";
+import { getAllUsers, login, addUser, updateUser, deleteUser, addFavoriteExercise, removeFavoriteExercise, addFavoriteWorkout, removeFavoriteWorkout, getUserById } from "../controllers/user-controller.js";
 
 
 
@@ -7,6 +7,7 @@ import { getAllUsers, login, addUser, updateUser, deleteUser, addFavoriteExercis
 const userRouter = express.Router();
 
 userRouter.get("/getAllUsers", getAllUsers);
+userRouter.get("/getUserById", getUserById)
 
 userRouter.post("/register", addUser);
 userRouter.post("/login", login)

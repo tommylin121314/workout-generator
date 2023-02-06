@@ -25,6 +25,40 @@ export const getAllUsers = async (req, res, next) => {
 
 }
 
+export const getUserById = async (req, res, next) => {
+
+    const id = req.body.id;
+
+    if (!id) {
+        return res.status(400).json({
+            err_code: 1,
+            message: "Please enter all required fields."
+        })
+    }
+
+    let user;
+
+    try {
+        user = await User.findById(id);
+    }
+    catch (err) {
+        return next(err);
+    }
+
+    if (!user) {
+        return res.status(500).json({
+            err_code: 0,
+            message: "Unexpected error occured."
+        })
+    }
+
+    return res.status(200).json({
+        user: user,
+        message: "User fetched."
+    })
+
+}
+
 export const addUser = async (req, res, next) => {
 
     let { firstName, lastName, username, displayName, password } = req.body;
