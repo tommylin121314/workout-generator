@@ -1,4 +1,5 @@
 import mongoose from "mongoose"
+import { ObjectId } from "mongoose";
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -21,7 +22,15 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         minLength: 6,
-    }
+    },
+    favoriteExercises: {
+        type: [ObjectId],
+        required: false,
+    },
+    favoriteWorkouts: {
+        type: [ObjectId],
+        required: false,
+    },
 });
 
 export default mongoose.model("User", userSchema)

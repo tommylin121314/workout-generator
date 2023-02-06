@@ -72,6 +72,8 @@ export const addUser = async (req, res, next) => {
             username: username,
             displayName: displayName,
             password: encrypted_password,
+            favoriteExercises: [],
+            favoriteWorkouts: [],
         });
         user = await user.save()
     }
@@ -95,9 +97,7 @@ export const addUser = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
 
-    const query = req.query;
-    let username = query.username;
-    let password = query.password;
+    let {username, password} = req.body
 
     if ( !username || !password ) {
         return res.status(400).json({
@@ -147,8 +147,7 @@ export const login = async (req, res, next) => {
 
 export const updateUser = async (req, res, next) => {
 
-    const id = req.params.id;
-    let { firstName, lastName, username, displayName, password } = req.body;
+    let { id, firstName, lastName, username, displayName, password } = req.body;
 
     if (!firstName || !lastName || !username || !displayName || !password) {
         return res.status(400).json({
@@ -217,7 +216,7 @@ export const updateUser = async (req, res, next) => {
 
 export const deleteUser = async(req, res, next) => {
 
-    const id = req.params.id
+    const id = req.body.id
     let deletedUser;
 
     try {
@@ -228,7 +227,7 @@ export const deleteUser = async(req, res, next) => {
     }
 
     if (!deletedUser) {
-        res.status(500).json({
+        return res.status(500).json({
             err_code: 0,
             message: "Error occured when deleting user."
         })
@@ -237,6 +236,202 @@ export const deleteUser = async(req, res, next) => {
     return res.status(200).json({
         user: deletedUser,
         message: "User was successfully deleted.",
+    })
+
+}
+
+export const addFavoriteExercise = async(req, res, next) => {
+    
+    let { id, exerciseId } = req.body;
+    let user;
+    let updatedUser
+
+    if ( !id || !exerciseId ) {
+        return res.status(500).json({
+            err_code: 0,
+            message: "Please enter all required fields."
+        })
+    }
+
+    try {
+        user = await User.findById(id);
+        let currList = user.favoriteExercises;
+
+        if (currList.includes(exerciseId)) {
+            return res.status(400).json({
+                err_code: 1,
+                message: "Exercise already in user favorites."
+            })
+        }
+
+        currList.push(exerciseId);
+        updatedUser = await User.findByIdAndUpdate(id, {
+            favoriteExercises: currList,
+        }, {
+            new: true,
+        })
+    }
+    catch (err) {
+        return next(err);
+    }
+
+    if (!user || !updatedUser) {
+        return res.status(500).json({
+            err_code: 2,
+            message: "Error occured when adding exercise to favorites.",
+        })
+    }
+
+    return res.status(200).json({
+        user: updateUser,
+        message: "Exercise was successfully favorited."
+    })
+
+}
+
+export const removeFavoriteExercise = async(req, res, next) => {
+    
+    let { id, exerciseId } = req.body;
+    let user;
+    let updatedUser
+
+    if ( !id || !exerciseId ) {
+        return res.status(500).json({
+            err_code: 0,
+            message: "Please enter all required fields."
+        })
+    }
+
+    try {
+        user = await User.findById(id);
+        let currList = user.favoriteExercises;
+
+        if (!currList.includes(exerciseId)) {
+            return res.status(400).json({
+                err_code: 1,
+                message: "Exercise was not found in user favorites."
+            })
+        }
+
+        currList.remove(exerciseId);
+        updatedUser = await User.findByIdAndUpdate(id, {
+            favoriteExercises: currList,
+        }, {
+            new: true,
+        })
+    }
+    catch (err) {
+        return next(err);
+    }
+
+    if (!user || !updatedUser) {
+        return res.status(500).json({
+            err_code: 2,
+            message: "Error occured when removing exercise from favorites.",
+        })
+    }
+
+    return res.status(200).json({
+        user: updateUser,
+        message: "Exercise was successfully removed from favorites."
+    })
+
+}
+
+export const addFavoriteWorkout = async(req, res, next) => {
+    
+    let { id, workoutId } = req.body;
+    let user;
+    let updatedUser
+
+    if ( !id || !workoutId ) {
+        return res.status(500).json({
+            err_code: 0,
+            message: "Please enter all required fields."
+        })
+    }
+
+    try {
+        user = await User.findById(id);
+        let currList = user.favoriteWorkouts;
+
+        if (currList.includes(workoutId)) {
+            return res.status(400).json({
+                err_code: 1,
+                message: "Workout already in user favorites."
+            })
+        }
+
+        currList.push(workoutId);
+        updatedUser = await User.findByIdAndUpdate(id, {
+            favoriteWorkouts: currList,
+        }, {
+            new: true,
+        })
+    }
+    catch (err) {
+        return next(err);
+    }
+
+    if (!user || !updatedUser) {
+        return res.status(500).json({
+            err_code: 2,
+            message: "Error occured when adding workout to favorites.",
+        })
+    }
+
+    return res.status(200).json({
+        user: updateUser,
+        message: "Workout was successfully favorited."
+    })
+
+}
+
+export const removeFavoriteWorkout = async(req, res, next) => {
+    
+    let { id, workoutId } = req.body;
+    let user;
+    let updatedUser
+
+    if ( !id || !workoutId ) {
+        return res.status(500).json({
+            err_code: 0,
+            message: "Please enter all required fields."
+        })
+    }
+
+    try {
+        user = await User.findById(id);
+        let currList = user.favoriteWorkouts;
+
+        if (!currList.includes(workoutId)) {
+            return res.status(400).json({
+                err_code: 1,
+                message: "Workout was not found in user favorites."
+            })
+        }
+
+        currList.remove(workoutId);
+        updatedUser = await User.findByIdAndUpdate(id, {
+            favoriteWorkouts: currList,
+        }, {
+            new: true,
+        })
+    }
+    catch (err) {
+        return next(err);
+    }
+
+    if (!user || !updatedUser) {
+        return res.status(500).json({
+            err_code: 2,
+            message: "Error occured when removing workout from favorites.",
+        })
+    }
+
+    return res.status(200).json({
+        user: updateUser,
+        message: "Workout was successfully removed from favorites."
     })
 
 }
