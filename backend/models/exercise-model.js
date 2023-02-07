@@ -21,6 +21,14 @@ const exerciseSchema = new mongoose.Schema({
     target: {
         type: [String],
         required: true,
+    },
+    isPublic: {
+        type: Boolean,
+        required: true,
+    },
+    ownerId: {
+        type: ObjectId,
+        required: false,
     }
 });
 

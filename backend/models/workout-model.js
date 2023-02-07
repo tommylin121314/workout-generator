@@ -31,3 +31,5 @@ const workoutSchema = new mongoose.Schema({
         required: false,
     }
 })
+
+export default mongoose.model("Workout", workoutSchema);
