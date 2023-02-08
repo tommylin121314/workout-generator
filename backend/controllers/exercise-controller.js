@@ -24,6 +24,39 @@ export const getAllExercises = async(req, res, next) => {
         exercises: exercises,
         message: "Exercises fetched successfully."
     })
+
+}
+
+export const getExerciseById = async(req, res, next) => {
+
+    const exerciseId = req.body.exerciseId;
+    let exercise;
+
+    if (!exerciseId) {
+        return res.status(400).json({
+            err_code: 0,
+            message: "Please enter all required fields."
+        })
+    }
+
+    try {
+        exercise = await Exercise.findById(exerciseId);
+    }
+    catch (err) {
+        return next(err)
+    }
+
+    if (!exercise) {
+        return res.status(400).json({
+            err_code: 1,
+            message: "Exercise not found."
+        })
+    }
+
+    return res.status(200).json({
+        exercise: exercise,
+        message: "Exercise was successfully fetched."
+    })
 }
 
 export const createExercise = async(req, res, next) => {
@@ -99,7 +132,7 @@ export const deleteExercise = async(req, res, next) => {
     catch (err) {
         return res.status(500).json({
             err_code: 1,
-            message: "Error occured when deleting exercise."
+            message: "Error occured when finding exercise."
         })
     }
 
@@ -147,5 +180,84 @@ export const deleteExercise = async(req, res, next) => {
             message: "Do not have ownership over this exercise."
         })
     }
+
+}
+
+export const updateExercise = async(req, res, next) => {
+     
+    let {id, ownerId, name, description, difficulty, target} = req.body;
+    let exercise;
+
+    if ( !id || !name || !description || !difficulty || !target ) {
+        return res.status(400).json({
+            err_code: 0,
+            message: "Please enter all required fields."
+        })
+    }
+
+    name = name.trim()
+    description = description.trim()
+    
+    if ( !id || !name || !description || !difficulty || !target ) {
+        return res.status(400).json({
+            err_code: 0,
+            message: "Please enter all required fields."
+        })
+    }
+
+    try {
+        exercise = await Exercise.findById(id);
+    }
+    catch (err) {
+        return next(err)
+    }
+
+    if (!exercise) {
+        return res.status(400).json({
+            err_code: 1,
+            message: "Exercise not found."
+        })
+    }
+
+    if (!ownerId) {
+        return res.status(400).json({
+            err_code: 0,
+            message: "Please enter all required fields."
+        })
+    }
+
+    if (!mongoose.Types.ObjectId(ownerId).equals(exercise.ownerId)) {
+        return res.status(400).json({
+            err_code: 2,
+            message: "Do not have access to this exercise."
+        })
+    }
+
+
+    try {
+        exercise = await Exercise.findByIdAndUpdate(id, {
+            name: name,
+            description: description,
+            target: target,
+            difficulty: difficulty,
+        }, {
+            new: true
+        })
+    }
+    catch (err) {
+        return next(err)
+    }
+
+    if (!exercise) {
+        return res.status(500).json({
+            err_code: 3,
+            message: "Error occured when updating exercise."
+        })
+    }
+
+    return res.status(200).json({
+        exercise: exercise,
+        message: "Exercise was successfully updated."
+    })
 
 }
