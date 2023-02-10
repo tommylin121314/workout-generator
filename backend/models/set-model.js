@@ -2,16 +2,8 @@ import mongoose from "mongoose"
 import { ObjectId } from "mongoose";
 
 const setSchema = new mongoose.Schema({
-    exercise: {
+    exerciseId: {
         type: ObjectId,
-        required: true,
-    },
-    isInterval: {
-        type: Boolean,
-        required: true,
-    },
-    isCountable: {
-        type: Boolean,
         required: true,
     },
     duration: {

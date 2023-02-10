@@ -22,6 +22,10 @@ const exerciseSchema = new mongoose.Schema({
         type: [String],
         required: true,
     },
+    isCountable: {
+        type: Boolean,
+        required: true,
+    },
     isPublic: {
         type: Boolean,
         required: true,

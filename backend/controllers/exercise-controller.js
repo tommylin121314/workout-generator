@@ -61,9 +61,9 @@ export const getExerciseById = async(req, res, next) => {
 
 export const createExercise = async(req, res, next) => {
 
-    let { name, description, difficulty, target, isPublic } = req.body;
+    let { name, description, difficulty, target, isCountable, isPublic } = req.body;
 
-    if ( !name || !description || !difficulty || !target || isPublic === null ) {
+    if ( !name || !description || !difficulty || !target || !isCountable || isPublic === null ) {
         return res.status(400).json({
             err_code: 0,
             message: "Please enter all required fields."
@@ -73,7 +73,7 @@ export const createExercise = async(req, res, next) => {
     name = name.trim()
     description = description.trim()
     
-    if ( !name || !description || !difficulty || !target || isPublic === null ) {
+    if ( !name || !description || !difficulty || !target || !isCountable || isPublic === null ) {
         return res.status(400).json({
             err_code: 0,
             message: "Please enter all required fields."
@@ -88,6 +88,7 @@ export const createExercise = async(req, res, next) => {
             description: description,
             difficulty: difficulty,
             target: target,
+            isCountable: isCountable,
             isPublic: isPublic,
         })
         if (!isPublic) {
@@ -185,10 +186,10 @@ export const deleteExercise = async(req, res, next) => {
 
 export const updateExercise = async(req, res, next) => {
      
-    let {id, ownerId, name, description, difficulty, target} = req.body;
+    let {id, ownerId, name, description, isCountable, difficulty, target} = req.body;
     let exercise;
 
-    if ( !id || !name || !description || !difficulty || !target ) {
+    if ( !id || !name || !description || !isCountable || !difficulty || !target ) {
         return res.status(400).json({
             err_code: 0,
             message: "Please enter all required fields."
@@ -198,7 +199,7 @@ export const updateExercise = async(req, res, next) => {
     name = name.trim()
     description = description.trim()
     
-    if ( !id || !name || !description || !difficulty || !target ) {
+    if ( !id || !name || !description || !isCountable || !difficulty || !target ) {
         return res.status(400).json({
             err_code: 0,
             message: "Please enter all required fields."
@@ -240,6 +241,7 @@ export const updateExercise = async(req, res, next) => {
             description: description,
             target: target,
             difficulty: difficulty,
+            isCountable: isCountable
         }, {
             new: true
         })
