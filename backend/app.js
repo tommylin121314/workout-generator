@@ -5,13 +5,14 @@ import userRouter from "./routes/user-routes.js";
 import exerciseRouter from "./routes/exercise-routes.js";
 import setRouter from "./routes/set-routes.js";
 import workoutRouter from "./routes/workout-routes.js";
+import appRouter from "./routes/app-routes.js";
 
 dotenv.config();
 const app = express();
 
 //middleware
 app.use(express.json())
-app.use("/workout", workoutRouter)
+app.use("/api", appRouter)
 
 mongoose.set("strictQuery", false);
 mongoose

@@ -1,5 +1,7 @@
 import User from "../models/user-model.js"
 import bcrypt from "bcryptjs"
+import Exercise from "../models/exercise-model.js"
+import Workout from "../models/workout-model.js"
 
 export const getAllUsers = async (req, res, next) => {
 
@@ -278,7 +280,8 @@ export const addFavoriteExercise = async(req, res, next) => {
     
     let { id, exerciseId } = req.body;
     let user;
-    let updatedUser
+    let updatedUser;
+    let exercise;
 
     if ( !id || !exerciseId ) {
         return res.status(500).json({
@@ -289,27 +292,45 @@ export const addFavoriteExercise = async(req, res, next) => {
 
     try {
         user = await User.findById(id);
-        let currList = user.favoriteExercises;
+        exercise = await Exercise.findById(exerciseId);
 
-        if (currList.includes(exerciseId)) {
+        if (!user) {
+            return res.status(400).json({
+                err_code: 1,
+                message: "User not found."
+            })
+        }
+        if (!exercise) {
+            return res.status(400).json({
+                err_code: 1,
+                message: "Exercise not found."
+            })
+        }
+
+        if (user.favoriteExercises.includes(exerciseId)) {
+            return res.status(400).json({
+                err_code: 1,
+                message: "Exercise already in user favorites."
+            })
+        }
+        if (exercise.favorites.includes(id)) {
             return res.status(400).json({
                 err_code: 1,
                 message: "Exercise already in user favorites."
             })
         }
 
-        currList.push(exerciseId);
-        updatedUser = await User.findByIdAndUpdate(id, {
-            favoriteExercises: currList,
-        }, {
-            new: true,
-        })
+        user.favoriteExercises.push(exerciseId)
+        exercise.favorites.push(id)
+        updatedUser = await user.save()
+        exercise = await exercise.save()
+
     }
     catch (err) {
         return next(err);
     }
 
-    if (!user || !updatedUser) {
+    if (!user || !updatedUser || !exercise) {
         return res.status(500).json({
             err_code: 2,
             message: "Error occured when adding exercise to favorites.",
@@ -317,7 +338,8 @@ export const addFavoriteExercise = async(req, res, next) => {
     }
 
     return res.status(200).json({
-        user: updateUser,
+        user: updatedUser,
+        exercise: exercise,
         message: "Exercise was successfully favorited."
     })
 
@@ -327,7 +349,8 @@ export const removeFavoriteExercise = async(req, res, next) => {
     
     let { id, exerciseId } = req.body;
     let user;
-    let updatedUser
+    let updatedUser;
+    let exercise;
 
     if ( !id || !exerciseId ) {
         return res.status(500).json({
@@ -338,27 +361,44 @@ export const removeFavoriteExercise = async(req, res, next) => {
 
     try {
         user = await User.findById(id);
-        let currList = user.favoriteExercises;
+        exercise = await Exercise.findById(exerciseId);
 
-        if (!currList.includes(exerciseId)) {
+        if (!user) {
+            return res.status(400).json({
+                err_code: 1,
+                message: "User not found."
+            })
+        }
+        if (!exercise) {
+            return res.status(400).json({
+                err_code: 1,
+                message: "Exercise not found."
+            })
+        }
+
+        if (!user.favoriteExercises.includes(exerciseId)) {
+            return res.status(400).json({
+                err_code: 1,
+                message: "Exercise was not found in user favorites."
+            })
+        }
+        if (!exercise.favorites.includes(id)) {
             return res.status(400).json({
                 err_code: 1,
                 message: "Exercise was not found in user favorites."
             })
         }
 
-        currList.remove(exerciseId);
-        updatedUser = await User.findByIdAndUpdate(id, {
-            favoriteExercises: currList,
-        }, {
-            new: true,
-        })
+        user.favoriteExercises.remove(exerciseId);
+        exercise.favorites.remove(id);
+        updatedUser = await user.save();
+        exercise = await exercise.save();
     }
     catch (err) {
         return next(err);
     }
 
-    if (!user || !updatedUser) {
+    if (!user || !updatedUser || !exercise) {
         return res.status(500).json({
             err_code: 2,
             message: "Error occured when removing exercise from favorites.",
@@ -366,7 +406,8 @@ export const removeFavoriteExercise = async(req, res, next) => {
     }
 
     return res.status(200).json({
-        user: updateUser,
+        user: updatedUser,
+        exercise: exercise,
         message: "Exercise was successfully removed from favorites."
     })
 
@@ -376,7 +417,8 @@ export const addFavoriteWorkout = async(req, res, next) => {
     
     let { id, workoutId } = req.body;
     let user;
-    let updatedUser
+    let updatedUser;
+    let workout;
 
     if ( !id || !workoutId ) {
         return res.status(500).json({
@@ -387,27 +429,45 @@ export const addFavoriteWorkout = async(req, res, next) => {
 
     try {
         user = await User.findById(id);
-        let currList = user.favoriteWorkouts;
+        workout = await Workout.findById(workoutId);
 
-        if (currList.includes(workoutId)) {
+        if (!user) {
+            return res.status(400).json({
+                err_code: 1,
+                message: "User not found."
+            })
+        }
+        if (!workout) {
+            return res.status(400).json({
+                err_code: 1,
+                message: "Workout not found."
+            })
+        }
+
+        if (user.favoriteWorkouts.includes(workoutId)) {
+            return res.status(400).json({
+                err_code: 1,
+                message: "Workout already in user favorites."
+            })
+        }
+        if (workout.favorites.includes(id)) {
             return res.status(400).json({
                 err_code: 1,
                 message: "Workout already in user favorites."
             })
         }
 
-        currList.push(workoutId);
-        updatedUser = await User.findByIdAndUpdate(id, {
-            favoriteWorkouts: currList,
-        }, {
-            new: true,
-        })
+        user.favoriteWorkouts.push(workoutId)
+        workout.favorites.push(id)
+        updatedUser = await user.save()
+        workout = await workout.save()
+
     }
     catch (err) {
         return next(err);
     }
 
-    if (!user || !updatedUser) {
+    if (!user || !updatedUser || !workout) {
         return res.status(500).json({
             err_code: 2,
             message: "Error occured when adding workout to favorites.",
@@ -415,7 +475,8 @@ export const addFavoriteWorkout = async(req, res, next) => {
     }
 
     return res.status(200).json({
-        user: updateUser,
+        user: updatedUser,
+        workout: workout,
         message: "Workout was successfully favorited."
     })
 
@@ -425,7 +486,8 @@ export const removeFavoriteWorkout = async(req, res, next) => {
     
     let { id, workoutId } = req.body;
     let user;
-    let updatedUser
+    let updatedUser;
+    let workout;
 
     if ( !id || !workoutId ) {
         return res.status(500).json({
@@ -436,27 +498,44 @@ export const removeFavoriteWorkout = async(req, res, next) => {
 
     try {
         user = await User.findById(id);
-        let currList = user.favoriteWorkouts;
+        workout = await Workout.findById(workoutId);
 
-        if (!currList.includes(workoutId)) {
+        if (!user) {
+            return res.status(400).json({
+                err_code: 1,
+                message: "User not found."
+            })
+        }
+        if (!workout) {
+            return res.status(400).json({
+                err_code: 1,
+                message: "Workout not found."
+            })
+        }
+
+        if (!user.favoriteWorkouts.includes(workoutId)) {
+            return res.status(400).json({
+                err_code: 1,
+                message: "Workout was not found in user favorites."
+            })
+        }
+        if (!workout.favorites.includes(id)) {
             return res.status(400).json({
                 err_code: 1,
                 message: "Workout was not found in user favorites."
             })
         }
 
-        currList.remove(workoutId);
-        updatedUser = await User.findByIdAndUpdate(id, {
-            favoriteWorkouts: currList,
-        }, {
-            new: true,
-        })
+        user.favoriteWorkouts.remove(workoutId);
+        workout.favorites.remove(id);
+        updatedUser = await user.save();
+        workout = await workout.save();
     }
     catch (err) {
         return next(err);
     }
 
-    if (!user || !updatedUser) {
+    if (!user || !updatedUser || !workout) {
         return res.status(500).json({
             err_code: 2,
             message: "Error occured when removing workout from favorites.",
@@ -464,7 +543,8 @@ export const removeFavoriteWorkout = async(req, res, next) => {
     }
 
     return res.status(200).json({
-        user: updateUser,
+        user: updatedUser,
+        workout: workout,
         message: "Workout was successfully removed from favorites."
     })
 
