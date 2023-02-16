@@ -1,6 +1,6 @@
 import Exercise from "../models/exercise-model.js";
+import User from "../models/user-model.js"
 import mongoose from "mongoose"
-
 
 export const getAllExercises = async(req, res, next) => {
 
@@ -242,6 +242,13 @@ export const deleteExercise = async(req, res, next) => {
 
     if ((mongoose.Types.ObjectId(ownerId)).equals(deletedExercise.ownerId)) {
         try {
+            let userIds = deletedExercise.favorites;
+            console.log(userIds)
+            for (let userId of userIds) {
+                let user = await User.findById(userId.toString());
+                user.favoriteExercises.remove(id)
+                user = await user.save()
+            }
             deletedExercise = await Exercise.findByIdAndDelete(id);
         }
         catch (err) {

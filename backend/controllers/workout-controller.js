@@ -1,4 +1,5 @@
 import Workout from "../models/workout-model.js"
+import User from "../models/user-model.js"
 import mongoose from "mongoose";
 
 export const getAllWorkouts = async(req, res, next) => {
@@ -241,6 +242,12 @@ export const deleteWorkout = async(req, res, next) => {
 
     if ((mongoose.Types.ObjectId(ownerId)).equals(deletedWorkout.ownerId)) {
         try {
+            let userIds = deletedWorkout.favorites;
+            for (let userId of userIds) {
+                let user = await User.findById(userId.toString());
+                user.favoriteWorkouts.remove(id)
+                user = await user.save()
+            }
             deletedWorkout = await Workout.findByIdAndDelete(id);
         }
         catch (err) {
