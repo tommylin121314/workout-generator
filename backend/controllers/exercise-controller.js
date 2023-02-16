@@ -29,10 +29,10 @@ export const getAllExercises = async(req, res, next) => {
 
 export const getExerciseById = async(req, res, next) => {
 
-    const exerciseId = req.body.exerciseId;
+    const id = req.body.id;
     let exercise;
 
-    if (!exerciseId) {
+    if (!id) {
         return res.status(400).json({
             err_code: 0,
             message: "Please enter all required fields."
@@ -40,7 +40,7 @@ export const getExerciseById = async(req, res, next) => {
     }
 
     try {
-        exercise = await Exercise.findById(exerciseId);
+        exercise = await Exercise.findById(id);
     }
     catch (err) {
         return next(err)
@@ -59,11 +59,69 @@ export const getExerciseById = async(req, res, next) => {
     })
 }
 
+export const getPublicExercises = async(req, res, next) => {
+
+    let exercises;
+
+    try {
+        exercises = await Exercise.find({'isPublic': true});
+    }
+    catch (err) {
+        return next(err);
+    }
+
+    if (!exercises) {
+        return res.status(500).json({
+            err_code: 0,
+            message: "Error occured when fetching exercises."
+        })
+    }
+
+    return res.status(200).json({
+        exercises: exercises,
+        message: "Exercises fetched successfully."
+    })
+
+}
+
+export const getUserExercises = async(req, res, next) => {
+    
+    let id = req.body.id;
+    let exercises;
+
+    if (!id) {
+        return res.status(400).json({
+            err_code: 0,
+            message: "Please enter all required fields."
+        })
+    }
+
+    try {
+        exercises = await Exercise.find({'ownerId': mongoose.Types.ObjectId(id)});
+    }
+    catch (err) {
+        return next(err);
+    }
+
+    if (!exercises) {
+        return res.status(500).json({
+            err_code: 0,
+            message: "Error occured when fetching exercises."
+        })
+    }
+
+    return res.status(200).json({
+        exercises: exercises,
+        message: "Exercises fetched successfully."
+    })
+
+}
+
 export const createExercise = async(req, res, next) => {
 
     let { name, description, difficulty, target, isCountable, isPublic } = req.body;
 
-    if ( !name || !description || !difficulty || !target || !isCountable || isPublic === null ) {
+    if ( !name || !description || !difficulty || !target || isCountable == null || isPublic === null ) {
         return res.status(400).json({
             err_code: 0,
             message: "Please enter all required fields."
@@ -73,10 +131,26 @@ export const createExercise = async(req, res, next) => {
     name = name.trim()
     description = description.trim()
     
-    if ( !name || !description || !difficulty || !target || !isCountable || isPublic === null ) {
+    if ( !name || !description || !difficulty || !target || isCountable == null || isPublic === null ) {
         return res.status(400).json({
             err_code: 0,
             message: "Please enter all required fields."
+        })
+    }
+
+    let existingExerciseWithName;
+
+    try {
+        existingExerciseWithName = Exercise.findOne({"name": name})
+    }
+    catch(err) {
+        return next(err)
+    }
+
+    if (existingExerciseWithName) {
+        return res.status(400).json({
+            err_code: 2,
+            message: "Exercise with name already exists."
         })
     }
 
@@ -92,6 +166,12 @@ export const createExercise = async(req, res, next) => {
             isPublic: isPublic,
         })
         if (!isPublic) {
+            if (!req.body.ownerId) {
+                return res.status(400).json({
+                    err_code: 0,
+                    message: "Please enter all required fields."
+                })
+            }
             exercise.ownerId = req.body.ownerId
         }
         exercise = await exercise.save()
@@ -116,9 +196,9 @@ export const createExercise = async(req, res, next) => {
 
 export const deleteExercise = async(req, res, next) => {
 
-    const exerciseId = req.body.exerciseId;
+    const id = req.body.id;
 
-    if (!exerciseId) {
+    if (!id) {
         return res.status(400).json({
             err_code: 0,
             message: "Please enter all required fields."
@@ -128,7 +208,7 @@ export const deleteExercise = async(req, res, next) => {
     let deletedExercise;
 
     try {
-        deletedExercise = await Exercise.findById(exerciseId);
+        deletedExercise = await Exercise.findById(id);
     }
     catch (err) {
         return res.status(500).json({
@@ -162,7 +242,7 @@ export const deleteExercise = async(req, res, next) => {
 
     if ((mongoose.Types.ObjectId(ownerId)).equals(deletedExercise.ownerId)) {
         try {
-            deletedExercise = await Exercise.findByIdAndDelete(exerciseId);
+            deletedExercise = await Exercise.findByIdAndDelete(id);
         }
         catch (err) {
             return res.status(500).json({
